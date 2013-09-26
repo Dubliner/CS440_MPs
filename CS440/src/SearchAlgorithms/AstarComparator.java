@@ -10,12 +10,20 @@ import MazeReadIn.Pair;
 /* In this case, Pair denotes current coordinates */
 public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 {
-	
-	public Pair<Integer, Integer> goal;
+	public int[][] cost;
+ 	public Pair<Integer, Integer> goal;
 	public Pair<Integer, Integer> start;
-	public AstarComparator(Pair<Integer, Integer> start, Pair<Integer,Integer> goal){
+	public AstarComparator(Pair<Integer, Integer> start, Pair<Integer,Integer> goal, int[][] pathCost){
 		this.start = start;
 		this.goal = goal;
+		this.cost = pathCost;
+	}
+	
+	public void setCost(int x, int y, int value){
+		this.cost[x][y] = value; 
+	}
+	public int getCost(int x, int y){
+		return this.cost[x][y];
 	}
 	
 	/* Get manhattan distance between two points */
@@ -26,18 +34,32 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 	
     public int compare(Pair<Integer, Integer> x, Pair<Integer, Integer> y)
     {
-        int xToGoal = getDistance(x, this.goal);
-        int xFromStart = getDistance(x, this.start);
-        int yToGoal = getDistance(y, this.goal);
-        int yFromStart = getDistance(y, this.start);
-        if (xToGoal+xFromStart < yToGoal+yFromStart)
-        {
-            return -1;
-        }
-        if (xToGoal+xFromStart > yToGoal+yFromStart)
-        {
-            return 1;
-        }
-        return 0;
+//        int xToGoal = getDistance(x, this.goal);
+//        int xFromStart = getDistance(x, this.start);
+//        int yToGoal = getDistance(y, this.goal);
+//        int yFromStart = getDistance(y, this.start);
+//        if (xToGoal+xFromStart < yToGoal+yFromStart)
+//        {
+//            return -1;
+//        }
+//        if (xToGoal+xFromStart > yToGoal+yFromStart)
+//        {
+//            return 1;
+//        }
+//        return 0;
+    	
+    	 int xToGoal = getDistance(x, this.goal);
+    	 int yToGoal = getDistance(y, this.goal);
+    	 int xFromStart = this.cost[x.getFirst()][x.getSecond()];
+    	 int yFromStart = this.cost[y.getFirst()][y.getSecond()];
+    	 if (xToGoal+xFromStart < yToGoal+yFromStart)
+    	 {
+    		 return -1;
+    	 }
+    	 if (xToGoal+xFromStart > yToGoal+yFromStart)
+    	 {
+    		 return 1;
+    	 }
+    	 return 0;
     }
 }

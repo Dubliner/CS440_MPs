@@ -26,6 +26,7 @@ import static java.lang.System.*;
  * 				   2, table to mark visited ->  int[][] canTravel 
  * 				   3, dictionary to remember the path -> Map<Pair<Integer, Integer>, Pair<Integer, Integer>> myMap
  * 				   4, path -> List<Pair<Integer, Integer>> myPath
+ * 				   5, table to check path cost so far -> int[][] pathCost
  * Result:
  * 	1, solution
  *  2, number of nodes expanded: # nodes on path - # marked visited
@@ -37,7 +38,7 @@ public class Astar {
 
 	/* 
 	 * canTravel: push adjacent node into queue, mark them as visited */
-	public static void pushAdjacent(PriorityQueue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap){
+	public static void pushAdjacent(PriorityQueue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap, AstarComparator comparator){
 		
 			int currX = curr.getFirst();
 			int currY = curr.getSecond();
@@ -47,6 +48,7 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX+1)+","+currY+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX+1, currY, comparator.getCost(currX, currY)+1);
 				myQueue.offer(rightChild);
 			}
 			if(currY+1<canTravel[0].length && canTravel[currX][currY+1]==0){
@@ -54,6 +56,7 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY+1)+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX, currY+1, comparator.getCost(currX, currY)+1);
 				myQueue.offer(upChild);
 			}
 			if(currX-1>=0 && canTravel[currX-1][currY]==0){
@@ -61,6 +64,7 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX-1)+","+currY+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX-1, currY, comparator.getCost(currX, currY)+1);
 				myQueue.offer(leftChild);
 			}
 			if(currY-1>=0 && canTravel[currX][currY-1]==0){
@@ -68,6 +72,7 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY-1)+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX, currY-1, comparator.getCost(currX, currY)+1);
 				myQueue.offer(downChild);
 			}
 				
@@ -84,13 +89,14 @@ public class Astar {
 		
 		Pair<Integer, Integer> myGoal = new Pair<Integer, Integer>(myMaze.goal[0], myMaze.goal[1]);
 		Pair<Integer, Integer> myStart = new Pair<Integer, Integer>(myMaze.start[0], myMaze.start[1]);
-        AstarComparator comparator = new AstarComparator(myStart,myGoal);
+		int[][] compareCost = new int[mazeWidth][mazeHeight];
+        AstarComparator comparator = new AstarComparator(myStart,myGoal,compareCost);
 		PriorityQueue<Pair<Integer, Integer>> myQueue = new PriorityQueue<Pair<Integer, Integer>>(10,comparator); 
 		int[][] canTravel = new int[mazeWidth][mazeHeight];
 		Map<String, String> myMap = new HashMap<String, String>();
 		List<String> myPath = new ArrayList<String>();
 		
-		// initialize queue, push the start point into queue, initial canTravel:
+		// initialize queue/pathcost, push the start point into queue, initial canTravel, initialize pathCost:
 		Pair<Integer, Integer> curr = new Pair(myMaze.start[0], myMaze.start[1]);
 		for(int i=0; i<mazeWidth; i++){
 			for(int j=0; j<mazeHeight; j++){
@@ -100,6 +106,12 @@ public class Astar {
 					canTravel[i][j] = 0;
 			}
 		}
+		for(int i=0; i<mazeWidth; i++){
+			for(int j=0; j<mazeHeight; j++){
+				comparator.setCost(i, j, Integer.MAX_VALUE);
+			}
+		}
+		comparator.setCost(myStart.getFirst(), myStart.getSecond(), 0);
 		myQueue.offer( curr );
 		
 		while(myQueue.size() != 0){
@@ -118,7 +130,7 @@ public class Astar {
 				break;			
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
-				pushAdjacent(myQueue, canTravel, checkCurr, myMap);				
+				pushAdjacent(myQueue, canTravel, checkCurr, myMap, comparator);				
 			}
 		}
 		
@@ -144,7 +156,7 @@ public class Astar {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String input = "src/MazeReadIn/mediumMaze";//console().readLine();
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		List<String> result = BFS(myMaze);
 		
