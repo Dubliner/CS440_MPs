@@ -5,6 +5,8 @@ package SearchAlgorithms;
 
 import java.util.Comparator;
 
+import Heuristics.PreferLeftDistance;
+import Heuristics.PreferRightDistance;
 import MazeReadIn.Pair;
 
 /* In this case, Pair denotes current coordinates */
@@ -27,8 +29,8 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 	}
 	
 	/* Get manhattan distance between two points */
-	public static int getDistance(Pair<Integer, Integer> a, Pair<Integer, Integer> b){
-		return Math.abs(a.getFirst()-b.getFirst())+Math.abs(a.getSecond()-b.getSecond());
+	public static double getDistance(Pair<Integer, Integer> a, Pair<Integer, Integer> b){
+		return PreferLeftDistance.getDistance(a);
 	}
 	
 	
@@ -48,8 +50,8 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 //        }
 //        return 0;
     	
-    	 int xToGoal = getDistance(x, this.goal);
-    	 int yToGoal = getDistance(y, this.goal);
+    	 double xToGoal = getDistance(x, this.goal);
+    	 double yToGoal = getDistance(y, this.goal);
     	 int xFromStart = this.cost[x.getFirst()][x.getSecond()];
     	 int yFromStart = this.cost[y.getFirst()][y.getSecond()];
     	 if (xToGoal+xFromStart < yToGoal+yFromStart)
