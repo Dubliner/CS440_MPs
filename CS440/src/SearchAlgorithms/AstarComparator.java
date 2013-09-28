@@ -36,19 +36,7 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 	
     public int compare(Pair<Integer, Integer> x, Pair<Integer, Integer> y)
     {
-//        int xToGoal = getDistance(x, this.goal);
-//        int xFromStart = getDistance(x, this.start);
-//        int yToGoal = getDistance(y, this.goal);
-//        int yFromStart = getDistance(y, this.start);
-//        if (xToGoal+xFromStart < yToGoal+yFromStart)
-//        {
-//            return -1;
-//        }
-//        if (xToGoal+xFromStart > yToGoal+yFromStart)
-//        {
-//            return 1;
-//        }
-//        return 0;
+//        
     	
     	 double xToGoal = getDistance(x, this.goal);
     	 double yToGoal = getDistance(y, this.goal);

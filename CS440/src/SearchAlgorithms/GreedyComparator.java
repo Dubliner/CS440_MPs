@@ -10,11 +10,20 @@ import MazeReadIn.Pair;
 /* In this case, Pair denotes current coordinates */
 public class GreedyComparator implements Comparator<Pair<Integer, Integer>>
 {
-	
+	public int[][] cost;
 	public Pair<Integer, Integer> goal;
 	
-	public GreedyComparator(Pair<Integer, Integer> goal){
+	public GreedyComparator(Pair<Integer, Integer> goal, int[][] pathCost){
 		this.goal = goal;
+		this.cost = pathCost;
+	}
+	
+	public void setCost(int x, int y, int value){
+		this.cost[x][y] = value;
+	}
+	
+	public int getCost(int x, int y){
+		return this.cost[x][y];
 	}
 	
 	/* Get manhattan distance between two points */

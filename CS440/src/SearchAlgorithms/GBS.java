@@ -16,6 +16,7 @@ import java.util.Queue;
 import MazeReadIn.Maze;
 import MazeReadIn.Pair;
 import MazeReadIn.ReadMaze;
+import MazeReadIn.WriteMaze;
 import static java.lang.System.*;
 
 
@@ -37,7 +38,7 @@ public class GBS {
 
 	/* 
 	 * canTravel: push adjacent node into queue, mark them as visited */
-	public static void pushAdjacent(PriorityQueue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap){
+	public static int pushAdjacent(PriorityQueue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap, GreedyComparator comparator){
 		
 			int currX = curr.getFirst();
 			int currY = curr.getSecond();
@@ -47,6 +48,7 @@ public class GBS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX+1)+","+currY+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX+1, currY, comparator.getCost(currX, currY)+1);
 				myQueue.offer(rightChild);
 			}
 			if(currY+1<canTravel[0].length && canTravel[currX][currY+1]==0){
@@ -54,6 +56,7 @@ public class GBS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY+1)+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX, currY+1, comparator.getCost(currX, currY)+1);
 				myQueue.offer(upChild);
 			}
 			if(currX-1>=0 && canTravel[currX-1][currY]==0){
@@ -61,6 +64,7 @@ public class GBS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX-1)+","+currY+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX-1, currY, comparator.getCost(currX, currY)+1);
 				myQueue.offer(leftChild);
 			}
 			if(currY-1>=0 && canTravel[currX][currY-1]==0){
@@ -68,8 +72,11 @@ public class GBS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY-1)+"";	
 				myMap.put(child, parent);
+				comparator.setCost(currX, currY-1, comparator.getCost(currX, currY)+1);
 				myQueue.offer(downChild);
 			}
+			
+			return myQueue.size();
 				
 				
 		
@@ -82,8 +89,10 @@ public class GBS {
 		int mazeWidth = myMaze.maze.length;
 		int mazeHeight = myMaze.maze[0].length;	
 		
+		Pair<Integer, Integer> myStart = new Pair<Integer, Integer>(myMaze.start[0], myMaze.start[1]);
 		Pair<Integer, Integer> myGoal = new Pair<Integer, Integer>(myMaze.goal[0], myMaze.goal[1]);
-        GreedyComparator comparator = new GreedyComparator(myGoal);
+		int[][] compareCost = new int[mazeWidth][mazeHeight];
+        GreedyComparator comparator = new GreedyComparator(myGoal, compareCost);
 		PriorityQueue<Pair<Integer, Integer>> myQueue = new PriorityQueue<Pair<Integer, Integer>>(10,comparator); 
 		int[][] canTravel = new int[mazeWidth][mazeHeight];
 		Map<String, String> myMap = new HashMap<String, String>();
@@ -99,14 +108,23 @@ public class GBS {
 					canTravel[i][j] = 0;
 			}
 		}
+		for(int i=0; i<mazeWidth; i++){
+			for(int j=0; j<mazeHeight; j++){
+				comparator.setCost(i, j, Integer.MAX_VALUE);
+			}
+		}
+		comparator.setCost(myStart.getFirst(), myStart.getSecond(), 0);
 		myQueue.offer( curr );
 		
+		int visited = 0;
+		int maxExpand = 0;
 		while(myQueue.size() != 0){
 			// pop one element from queue, mark it visited
 			Pair checkCurr = myQueue.poll();
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
+			visited++;
 			
 			// check if we reach the goal
 			int goalX = myMaze.goal[0];
@@ -117,10 +135,15 @@ public class GBS {
 				break;			
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
-				pushAdjacent(myQueue, canTravel, checkCurr, myMap);				
+				int currExpand = pushAdjacent(myQueue, canTravel, checkCurr, myMap, comparator);	
+				if(maxExpand < currExpand){
+					maxExpand = currExpand;
+				}
 			}
 		}
-		
+		out.println("VISITED:"+visited); // print out the visited cells count
+		out.println("FRONTIER COUNT:"+maxExpand);
+		out.println("MAX TREE DEPTH:"+findMaxDepth(comparator.cost));
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
 		String currKey = ""+myMaze.goal[0]+","+myMaze.goal[1]+"";
@@ -134,6 +157,17 @@ public class GBS {
 		return myPath;
 	}
 	
+	/* Find the maximal tree depth */
+	public static int findMaxDepth(int[][] maze){
+		int max = Integer.MIN_VALUE;
+		for(int i=0; i<maze.length; i++){
+			for(int j=0; j<maze[0].length; j++){
+				if(maze[i][j]<Integer.MAX_VALUE && max<maze[i][j])
+					max = maze[i][j];
+			}
+		}
+		return max;
+	}
 	
 	
 	/**
@@ -144,13 +178,16 @@ public class GBS {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
 		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		List<String> result = BFS(myMaze);
 		
 		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println(result.size());
+		out.println("PATH COST:"+result.size());
+		
+		WriteMaze.writeSolution(input, result, output);
 	}
 
 }

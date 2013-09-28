@@ -15,6 +15,7 @@ import java.util.Stack;
 import MazeReadIn.Maze;
 import MazeReadIn.Pair;
 import MazeReadIn.ReadMaze;
+import MazeReadIn.WriteMaze;
 import static java.lang.System.*;
 
 
@@ -31,7 +32,7 @@ public class DFS {
 
 	/* 
 	 * canTravel: push adjacent node into queue, mark them as visited */
-	public static void pushAdjacent(Stack<Pair<Integer, Integer>> myStack, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap){
+	public static int pushAdjacent(Stack<Pair<Integer, Integer>> myStack, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap, int[][] pathCost){
 		
 			int currX = curr.getFirst();
 			int currY = curr.getSecond();
@@ -41,6 +42,7 @@ public class DFS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX+1)+","+currY+"";	
 				myMap.put(child, parent);
+				pathCost[currX+1][currY] = pathCost[currX][currY]+1;
 				myStack.push(rightChild);
 			}
 			if(currY+1<canTravel[0].length && canTravel[currX][currY+1]==0){
@@ -48,6 +50,7 @@ public class DFS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY+1)+"";	
 				myMap.put(child, parent);
+				pathCost[currX][currY+1] = pathCost[currX][currY]+1;
 				myStack.push(upChild);
 			}
 			if(currX-1>=0 && canTravel[currX-1][currY]==0){
@@ -55,6 +58,7 @@ public class DFS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX-1)+","+currY+"";	
 				myMap.put(child, parent);
+				pathCost[currX-1][currY] = pathCost[currX][currY]+1;
 				myStack.push(leftChild);
 			}
 			if(currY-1>=0 && canTravel[currX][currY-1]==0){
@@ -62,10 +66,11 @@ public class DFS {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY-1)+"";	
 				myMap.put(child, parent);
+				pathCost[currX][currY-1] = pathCost[currX][currY]+1;
 				myStack.push(downChild);
 			}
 				
-				
+			return myStack.size();	
 		
 	}
 	
@@ -78,6 +83,7 @@ public class DFS {
 		
 		Stack<Pair<Integer, Integer>> myStack = new Stack<Pair<Integer, Integer>>(); 
 		int[][] canTravel = new int[mazeWidth][mazeHeight];
+		int[][] pathCost = new int[mazeWidth][mazeHeight];
 		Map<String, String> myMap = new HashMap<String, String>();
 		List<String> myPath = new ArrayList<String>();
 		
@@ -91,7 +97,15 @@ public class DFS {
 					canTravel[i][j] = 0;
 			}
 		}
+		for(int i=0; i<mazeWidth; i++){
+			for(int j=0; j<mazeHeight; j++){
+				pathCost[i][j] = Integer.MAX_VALUE; 
+			}
+		}
+		pathCost[curr.getFirst()][curr.getSecond()] = 0;
 		myStack.push( curr );
+		int visited = 0;
+		int maxExpand = 0;
 		
 		while(myStack.size() != 0){
 			// pop one element from queue, mark it visited
@@ -99,6 +113,7 @@ public class DFS {
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
+			visited++;
 			
 			// check if we reach the goal
 			int goalX = myMaze.goal[0];
@@ -109,10 +124,15 @@ public class DFS {
 				break;			
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
-				pushAdjacent(myStack, canTravel, checkCurr, myMap);				
+				int currExpand = pushAdjacent(myStack, canTravel, checkCurr, myMap, pathCost);
+				if(maxExpand < currExpand){
+					maxExpand = currExpand;
+				}
 			}
 		}
-		
+		out.println("VISITED:" + visited);
+		out.println("FRONTIER COUNT:"+ maxExpand);
+		out.println("MAX TREE DEPTH:"+findMaxDepth(pathCost));
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
 		String currKey = ""+myMaze.goal[0]+","+myMaze.goal[1]+"";
@@ -126,7 +146,17 @@ public class DFS {
 		return myPath;
 	}
 	
-	
+	/* Find the maximal tree depth */
+	public static int findMaxDepth(int[][] maze){
+		int max = Integer.MIN_VALUE;
+		for(int i=0; i<maze.length; i++){
+			for(int j=0; j<maze[0].length; j++){
+				if(maze[i][j]<Integer.MAX_VALUE && max<maze[i][j])
+					max = maze[i][j];
+			}
+		}
+		return max;
+	}
 	
 	/**
 	 * @param args
@@ -135,7 +165,8 @@ public class DFS {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String input = "src/MazeReadIn/mediumMaze";//console().readLine();
+		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		List<String> result = DFS(myMaze);
 		
@@ -143,8 +174,9 @@ public class DFS {
 			
 			out.println(result.get(i));
 		}
-		out.println(result.size());
+		out.println("PATH COST:"+result.size());
 		
+		WriteMaze.writeSolution(input, result, output);
 	}
 
 }

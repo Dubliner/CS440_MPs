@@ -16,6 +16,7 @@ import java.util.Queue;
 import MazeReadIn.Maze;
 import MazeReadIn.Pair;
 import MazeReadIn.ReadMaze;
+import MazeReadIn.WriteMaze;
 import static java.lang.System.*;
 
 
@@ -38,7 +39,7 @@ public class Astar {
 
 	/* 
 	 * canTravel: push adjacent node into queue, mark them as visited */
-	public static void pushAdjacent(PriorityQueue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap, AstarComparator comparator){
+	public static int pushAdjacent(PriorityQueue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap, AstarComparator comparator){
 		
 			int currX = curr.getFirst();
 			int currY = curr.getSecond();
@@ -76,7 +77,7 @@ public class Astar {
 				myQueue.offer(downChild);
 			}
 				
-				
+			return myQueue.size();	
 		
 	}
 	
@@ -113,6 +114,8 @@ public class Astar {
 		}
 		comparator.setCost(myStart.getFirst(), myStart.getSecond(), 0);
 		myQueue.offer( curr );
+		int visited =0;
+		int maxExpand = 0;
 		
 		while(myQueue.size() != 0){
 			// pop one element from queue, mark it visited
@@ -120,6 +123,7 @@ public class Astar {
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
+			visited++;
 			
 			// check if we reach the goal
 			int goalX = myMaze.goal[0];
@@ -130,10 +134,14 @@ public class Astar {
 				break;			
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
-				pushAdjacent(myQueue, canTravel, checkCurr, myMap, comparator);				
+				int currExpand = pushAdjacent(myQueue, canTravel, checkCurr, myMap, comparator);
+				if(maxExpand < currExpand){
+					maxExpand = currExpand;
+				}
 			}
 		}
-		
+		out.println("VISITED:"+visited);
+		out.println("FRONTIER COUNT:"+maxExpand);
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
 		String currKey = ""+myMaze.goal[0]+","+myMaze.goal[1]+"";
@@ -144,6 +152,7 @@ public class Astar {
 			myPath.add(currKey);
 			count++;
 		}		
+		out.println("MAX TREE DEPTH:"+myPath.size());
 		return myPath;
 	}
 	
@@ -156,7 +165,8 @@ public class Astar {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/mediumMaze";//console().readLine();
+		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		List<String> result = BFS(myMaze);
 		
@@ -164,6 +174,8 @@ public class Astar {
 			out.println(result.get(i));
 		}
 		out.println(result.size());
+		
+		WriteMaze.writeSolution(input, result, output);
 	}
 
 }

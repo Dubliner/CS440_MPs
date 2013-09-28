@@ -15,6 +15,7 @@ import java.util.Queue;
 import MazeReadIn.Maze;
 import MazeReadIn.Pair;
 import MazeReadIn.ReadMaze;
+import MazeReadIn.WriteMaze;
 import static java.lang.System.*;
 
 
@@ -36,7 +37,7 @@ public class BFS {
 
 	/* 
 	 * canTravel: push adjacent node into queue, mark them as visited */
-	public static void pushAdjacent(Queue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap){
+	public static int pushAdjacent(Queue<Pair<Integer, Integer>> myQueue, int[][] canTravel, Pair<Integer, Integer> curr, Map<String, String> myMap){
 		
 			int currX = curr.getFirst();
 			int currY = curr.getSecond();
@@ -71,7 +72,7 @@ public class BFS {
 			}
 				
 				
-		
+			return myQueue.size();
 	}
 	
 	/* findGoal: check if we find the goal */
@@ -97,6 +98,8 @@ public class BFS {
 			}
 		}
 		myQueue.offer( curr );
+		int visited = 0;
+		int maxExpand = 0;
 		
 		while(myQueue.size() != 0){
 			// pop one element from queue, mark it visited
@@ -104,6 +107,7 @@ public class BFS {
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
+			visited++;
 			
 			// check if we reach the goal
 			int goalX = myMaze.goal[0];
@@ -114,10 +118,14 @@ public class BFS {
 				break;			
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
-				pushAdjacent(myQueue, canTravel, checkCurr, myMap);				
+				int currExpand = pushAdjacent(myQueue, canTravel, checkCurr, myMap);
+				if(maxExpand < currExpand){
+					maxExpand = currExpand;
+				}
 			}
 		}
-		
+		out.println("VISITED:"+visited);
+		out.println("FRONTIER COUNT:"+maxExpand);
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
 		String currKey = ""+myMaze.goal[0]+","+myMaze.goal[1]+"";
@@ -128,6 +136,7 @@ public class BFS {
 			myPath.add(currKey);
 			count++;
 		}		
+		out.println("MAX TREE DEPTH:"+myPath.size());
 		return myPath;
 	}
 	
@@ -141,13 +150,17 @@ public class BFS {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
 		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		List<String> result = BFS(myMaze);
 		
+		out.println("SOLUTION:");
 		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println(result.size());
+		out.println("PATH COST:"+result.size());
+		
+		WriteMaze.writeSolution(input, result, output);
 	}
 
 }

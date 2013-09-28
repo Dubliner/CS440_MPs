@@ -13,7 +13,8 @@ public class Test
     public static void main(String[] args)
     {
     	Pair<Integer, Integer> myGoal = new Pair<Integer, Integer>(2,2);
-        GreedyComparator comparator = new GreedyComparator(myGoal);
+    	int[][] pathCost = new int[2][2]; 
+        GreedyComparator comparator = new GreedyComparator(myGoal, pathCost);
         PriorityQueue<Pair<Integer, Integer>> queue = 
             new PriorityQueue<Pair<Integer, Integer>>(10, comparator);
         
