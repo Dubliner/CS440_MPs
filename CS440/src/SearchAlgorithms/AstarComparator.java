@@ -3,8 +3,11 @@
  */
 package SearchAlgorithms;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
+import Heuristics.ManhattanDistance;
+import Heuristics.MultiGoalDistance;
 import Heuristics.PreferLeftDistance;
 import Heuristics.PreferRightDistance;
 import MazeReadIn.Pair;
@@ -15,10 +18,22 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 	public int[][] cost;
  	public Pair<Integer, Integer> goal;
 	public Pair<Integer, Integer> start;
+	public ArrayList<Pair<Integer, Integer>> goals; 
+	
+	/*Constructor for single goal maze*/
 	public AstarComparator(Pair<Integer, Integer> start, Pair<Integer,Integer> goal, int[][] pathCost){
 		this.start = start;
 		this.goal = goal;
 		this.cost = pathCost;
+		this.goals = null;
+	}
+	
+	/*Constructor for multi-goal maze*/
+	public AstarComparator(Pair<Integer, Integer> start, ArrayList<Pair<Integer, Integer>> goals, int[][] pathCost){
+		this.start = start;
+		this.goal = null;
+		this.cost = pathCost;
+		this.goals = goals;
 	}
 	
 	public void setCost(int x, int y, int value){
@@ -28,18 +43,30 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 		return this.cost[x][y];
 	}
 	
-	/* Get manhattan distance between two points */
-	public static double getDistance(Pair<Integer, Integer> a, Pair<Integer, Integer> b){
-		return PreferLeftDistance.getDistance(a);
+	/* Get heuristic for a point when there is only one goal */
+	public static double getDistance(Pair<Integer, Integer> start, Pair<Integer, Integer> goal){
+		//return PreferLeftDistance.getDistance(start);  
+		//return PreferRightDistance.getDistance(start); 
+		return ManhattanDistance.getDistance(start, goal);
+		
+	}
+
+	/* Get heuristic for a point when there are multiple goals */
+	public static double getDistance(Pair<Integer, Integer> start, ArrayList<Pair<Integer, Integer>> goals)
+	{
+		return MultiGoalDistance.getDistance(start, goals);
 	}
 	
 	
     public int compare(Pair<Integer, Integer> x, Pair<Integer, Integer> y)
     {
-//        
-    	
-    	 double xToGoal = getDistance(x, this.goal);
-    	 double yToGoal = getDistance(y, this.goal);
+    	//Single goal    	 
+   	 double xToGoal = getDistance(x, this.goals.get(0));
+   	 double yToGoal = getDistance(y, this.goals.get(0));
+    	 //Multi goals
+//    	 double xToGoal = getDistance(x, this.goals);
+//    	 double yToGoal = getDistance(y, this.goals);
+//    	 
     	 int xFromStart = this.cost[x.getFirst()][x.getSecond()];
     	 int yFromStart = this.cost[y.getFirst()][y.getSecond()];
     	 if (xToGoal+xFromStart < yToGoal+yFromStart)

@@ -7,9 +7,12 @@ import MazeReadIn.Pair;
 
 public class MultiGoalDistance {
 
-	public static int getDistance(Pair<Integer, Integer> a, Pair<Integer, Integer>[] goalPairs){
+	public static int getDistance(Pair<Integer, Integer> a, ArrayList<Pair<Integer, Integer>> goalPairs){
 		
-		ArrayList<Pair<Integer, Integer>> goals = new ArrayList<Pair<Integer, Integer>>(Arrays.asList(goalPairs));//making a deepcopy. arraylist pass by ref in java
+		ArrayList<Pair<Integer, Integer>> goals = new ArrayList<Pair<Integer, Integer>>();//making a deepcopy. arraylist pass by ref in java
+		for(Pair<Integer,Integer> g : goalPairs) {
+		    goals.add(new Pair<Integer, Integer>(g.getFirst(), g.getSecond()));
+		}
 		return findShortest(a, goals);
 	}
 	
@@ -34,8 +37,7 @@ public class MultiGoalDistance {
 				}
 			}
 			
-			start = others.get(index);
-			others.remove(index);
+			start = others.remove(index);
 			totalHeurist += shortest;
 		}
 		

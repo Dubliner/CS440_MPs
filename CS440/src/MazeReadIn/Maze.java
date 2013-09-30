@@ -3,18 +3,20 @@
  */
 package MazeReadIn;
 
+import java.util.ArrayList;
+
 /**
  * @author zhenchengwang
  *
  */
 public class Maze {
 	public int [] start;
-	public int [] goal;
+	public ArrayList<Pair<Integer, Integer>> goals;
 	public int [][] maze;
 	
-	public Maze(int[] myStart, int[] myGoal, int[][] myMaze){
+	public Maze(int[] myStart, ArrayList<Pair<Integer, Integer>> myGoal, int[][] myMaze){
 		this.start = myStart;
-		this.goal = myGoal;
+		this.goals = myGoal;
 		this.maze = myMaze;
 	}
 

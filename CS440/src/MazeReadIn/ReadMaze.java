@@ -40,21 +40,21 @@ public class ReadMaze {
 		int [][] maze = new int[mazeWidth][mazeHeight];
 		/* Find entrance and exit of the maze, mark walls and paths */
 		int [] start = new int[2]; // 0: width, 1: height 
-		int [] goal = new int[2]; // 0: width, 1: height
+		ArrayList<Pair<Integer, Integer>> goals = new ArrayList<Pair<Integer, Integer>>(); 
 		String a = "00";
 		
 		for(int i=0; i<mazeWidth; i++){
 			for(int j=0; j<mazeHeight; j++){			
 				char curr = mazeText.get(j).charAt(i);
-				if(curr == '.'){ // entrance: s
+				if(curr == 'P'){ // entrance: s
 					maze[i][j] = 2;
 					start[0] = i;
 					start[1] = j;
 				}
-				else if(curr == 'P'){ // exit: g
+				else if(curr == '.'){ // exit: g
 					maze[i][j] = 3;
-					goal[0] = i;
-					goal[1] = j;
+					Pair<Integer, Integer> goal = new Pair<Integer, Integer>(i, j);
+					goals.add(goal);
 				}
 				else if(curr == '%'){ // walls: 1
 					maze[i][j] = 1;
@@ -65,7 +65,7 @@ public class ReadMaze {
 			}
 		}
 		
-		Maze myMaze = new Maze(start, goal, maze);
+		Maze myMaze = new Maze(start, goals, maze);
 		return myMaze;
 	}
 	

@@ -6,6 +6,7 @@ package SearchAlgorithms;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,11 +85,13 @@ public class Astar {
 	/* findGoal: check if we find the goal */
 	
 	/* GBS Main function: */
-	public static List<String> BFS(Maze myMaze){
+	public static ArrayList<String> BFS(Maze myMaze, ArrayList<Integer> counter){
+		
+		ArrayList<String> path = new ArrayList<String>();
 		int mazeWidth = myMaze.maze.length;
 		int mazeHeight = myMaze.maze[0].length;	
 		
-		Pair<Integer, Integer> myGoal = new Pair<Integer, Integer>(myMaze.goal[0], myMaze.goal[1]);
+		ArrayList<Pair<Integer, Integer>> myGoal = myMaze.goals;
 		Pair<Integer, Integer> myStart = new Pair<Integer, Integer>(myMaze.start[0], myMaze.start[1]);
 		int[][] compareCost = new int[mazeWidth][mazeHeight];
         AstarComparator comparator = new AstarComparator(myStart,myGoal,compareCost);
@@ -114,46 +117,56 @@ public class Astar {
 		}
 		comparator.setCost(myStart.getFirst(), myStart.getSecond(), 0);
 		myQueue.offer( curr );
-		int visited =0;
-		int maxExpand = 0;
-		
 		while(myQueue.size() != 0){
 			// pop one element from queue, mark it visited
 			Pair checkCurr = myQueue.poll();
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
-			visited++;
 			
-			// check if we reach the goal
-			int goalX = myMaze.goal[0];
-			int goalY = myMaze.goal[1];		
+			Integer nVisited = counter.get(0);
+			nVisited++;
+			counter.set(0, nVisited);
+			// check if we reach the goal(s)
 			
+			Iterator<Pair<Integer, Integer>> goalsIterator = myMaze.goals.iterator();
+			boolean found = false;
+			while (goalsIterator.hasNext()) {
+		            Pair<Integer, Integer> g = goalsIterator.next();
+		            int goalX = g.getFirst();
+					int goalY = g.getSecond();
+					if(currX == goalX && currY == goalY ){
+						myMaze.start[0] = g.getFirst();
+						myMaze.start[1] = g.getSecond();
+						goalsIterator.remove();
+						found = true;
+						break;
+						
+					}
+		    }
 			// if so terminate
-			if(currX == goalX && currY == goalY )
+			if(found){				
 				break;			
+			}
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
 				int currExpand = pushAdjacent(myQueue, canTravel, checkCurr, myMap, comparator);
-				if(maxExpand < currExpand){
+				Integer maxExpand = counter.get(1);
+				if( maxExpand < currExpand){
 					maxExpand = currExpand;
+					counter.set(1, maxExpand);
 				}
 			}
 		}
-		out.println("VISITED:"+visited);
-		out.println("FRONTIER COUNT:"+maxExpand);
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
-		String currKey = ""+myMaze.goal[0]+","+myMaze.goal[1]+"";
-		myPath.add(currKey);
-		int count = 0;
+		String currKey = ""+myMaze.start[0]+"," + myMaze.start[1]+"";
+		path.add(currKey);
 		while(myMap.containsKey(currKey)){
 			currKey = myMap.get(currKey);
-			myPath.add(currKey);
-			count++;
-		}		
-		out.println("MAX TREE DEPTH:"+myPath.size());
-		return myPath;
+			path.add(currKey);
+		}
+		return path;
 	}
 	
 	
@@ -165,16 +178,34 @@ public class Astar {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String input = "src/MazeReadIn/trickysearch";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
-		List<String> result = BFS(myMaze);
+		ArrayList<String> result = new ArrayList<String>();
+		boolean firstLoop = true;
+		ArrayList<Integer> counter = new ArrayList<Integer>();
+		counter.add(new Integer(0));
+		counter.add(new Integer(0));
+		while(myMaze.goals.size()>0){
+			
+			ArrayList<String> partialResult = BFS(myMaze, counter);
+			if(firstLoop){
+				partialResult.addAll(result);
+				firstLoop = false;
+			}else
+			{
+				partialResult.addAll(result.subList(1, result.size()-1));
+			}
+			result = partialResult;
+		}
 		
 		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println(result.size());
-		
+		out.println("PATH LEN:" + result.size());
+
+		out.println("VISITED:"+ counter.get(0));
+		out.println("FRONTIER COUNT:"+ counter.get(1));
 		WriteMaze.writeSolution(input, result, output);
 	}
 

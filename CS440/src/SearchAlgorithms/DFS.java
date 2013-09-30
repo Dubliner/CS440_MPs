@@ -6,6 +6,7 @@ package SearchAlgorithms;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,8 @@ public class DFS {
 	/* findGoal: check if we find the goal */
 	
 	/* BFS Main function: */
-	public static List<String> DFS(Maze myMaze){
+	public static ArrayList<String> DFS(Maze myMaze, ArrayList<Integer> counter){
+		ArrayList<String> path = new ArrayList<String>();
 		int mazeWidth = myMaze.maze.length;
 		int mazeHeight = myMaze.maze[0].length;	
 		
@@ -104,47 +106,57 @@ public class DFS {
 		}
 		pathCost[curr.getFirst()][curr.getSecond()] = 0;
 		myStack.push( curr );
-		int visited = 0;
-		int maxExpand = 0;
-		
 		while(myStack.size() != 0){
 			// pop one element from queue, mark it visited
 			Pair checkCurr = myStack.pop();
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
-			visited++;
+			System.out.println("CURR: " + currX + "," + currY);
+			Integer nVisited = counter.get(0);
+			nVisited++;
+			counter.set(0, nVisited);
+			// check if we reach the goal(s)
 			
-			// check if we reach the goal
-			int goalX = myMaze.goal[0];
-			int goalY = myMaze.goal[1];		
-			
+			Iterator<Pair<Integer, Integer>> goalsIterator = myMaze.goals.iterator();
+			boolean found = false;
+			while (goalsIterator.hasNext()) {
+	            Pair<Integer, Integer> g = goalsIterator.next();
+	            int goalX = g.getFirst();
+				int goalY = g.getSecond();
+				if(currX == goalX && currY == goalY ){
+					myMaze.start[0] = g.getFirst();
+					myMaze.start[1] = g.getSecond();
+					goalsIterator.remove();
+					found = true;
+					break;
+				}
+		    }
 			// if so terminate
-			if(currX == goalX && currY == goalY )
+			if(found){				
 				break;			
+			}
 			// if not push unvisited adjacents into queue, update dictionary, so we can find our path when we reach the goal:
 			else{
 				int currExpand = pushAdjacent(myStack, canTravel, checkCurr, myMap, pathCost);
-				if(maxExpand < currExpand){
+				Integer maxExpand = counter.get(1);
+				if( maxExpand < currExpand){
 					maxExpand = currExpand;
+					counter.set(1, maxExpand);
 				}
 			}
 		}
-		out.println("VISITED:" + visited);
-		out.println("FRONTIER COUNT:"+ maxExpand);
-		out.println("MAX TREE DEPTH:"+findMaxDepth(pathCost));
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
-		String currKey = ""+myMaze.goal[0]+","+myMaze.goal[1]+"";
-		myPath.add(currKey);
-		int count = 0;
+		String currKey = ""+myMaze.start[0]+"," + myMaze.start[1]+"";
+		path.add(currKey);
 		while(myMap.containsKey(currKey)){
 			currKey = myMap.get(currKey);
-			myPath.add(currKey);
-			count++;
-		}		
-		return myPath;
+			path.add(currKey);
+		}
+		return path;
 	}
+
 	
 	/* Find the maximal tree depth */
 	public static int findMaxDepth(int[][] maze){
@@ -168,13 +180,31 @@ public class DFS {
 		String input = "src/MazeReadIn/mediumMaze";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
-		List<String> result = DFS(myMaze);
-		
-		for(int i=0; i<result.size(); i++){
+		ArrayList<String> result = new ArrayList<String>();
+		boolean firstLoop = true;
+		ArrayList<Integer> counter = new ArrayList<Integer>();
+		counter.add(new Integer(0));
+		counter.add(new Integer(0));
+		while(myMaze.goals.size()>0){
 			
+			ArrayList<String> partialResult = DFS(myMaze, counter);
+			if(firstLoop){
+				partialResult.addAll(result);
+				firstLoop = false;
+			}else
+			{
+				partialResult.addAll(result.subList(1, result.size()-1));
+			}
+			result = partialResult;
+		}
+		
+		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println("PATH COST:"+result.size());
+		out.println("PATH LEN:" + result.size());
+
+		out.println("VISITED:"+ counter.get(0));
+		out.println("FRONTIER COUNT:"+ counter.get(1));
 		
 		WriteMaze.writeSolution(input, result, output);
 	}
