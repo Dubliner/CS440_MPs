@@ -61,8 +61,8 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
     public int compare(Pair<Integer, Integer> x, Pair<Integer, Integer> y)
     {
     	//Single goal    	 
-   	 double xToGoal = getDistance(x, this.goals.get(0));
-   	 double yToGoal = getDistance(y, this.goals.get(0));
+    	double xToGoal = getDistance(x, this.goals.get(0));
+   	 	double yToGoal = getDistance(y, this.goals.get(0));
     	 //Multi goals
 //    	 double xToGoal = getDistance(x, this.goals);
 //    	 double yToGoal = getDistance(y, this.goals);

@@ -87,7 +87,6 @@ public class DFS {
 		int[][] canTravel = new int[mazeWidth][mazeHeight];
 		int[][] pathCost = new int[mazeWidth][mazeHeight];
 		Map<String, String> myMap = new HashMap<String, String>();
-		List<String> myPath = new ArrayList<String>();
 		
 		// initialization queue, push the start point into queue, initial canTravel:
 		Pair<Integer, Integer> curr = new Pair(myMaze.start[0], myMaze.start[1]);
@@ -146,6 +145,8 @@ public class DFS {
 				}
 			}
 		}
+		
+		counter.set(2, findMaxDepth(pathCost));
 		// we are out of the loop, now report the path we found
 			// initialize initial key: the 
 		String currKey = ""+myMaze.start[0]+"," + myMaze.start[1]+"";
@@ -177,7 +178,7 @@ public class DFS {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/mediumMaze";//console().readLine();
+		String input = "src/MazeReadIn/smallMaze";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		ArrayList<String> result = new ArrayList<String>();
@@ -185,9 +186,15 @@ public class DFS {
 		ArrayList<Integer> counter = new ArrayList<Integer>();
 		counter.add(new Integer(0));
 		counter.add(new Integer(0));
+		counter.add(new Integer(-1));
+		Integer maxDepth = -1;
 		while(myMaze.goals.size()>0){
 			
 			ArrayList<String> partialResult = DFS(myMaze, counter);
+			if(maxDepth < counter.get(2))
+			{
+				maxDepth = counter.get(2);
+			}
 			if(firstLoop){
 				partialResult.addAll(result);
 				firstLoop = false;
@@ -201,8 +208,8 @@ public class DFS {
 		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println("PATH LEN:" + result.size());
-
+		out.println("PATH LEN:" + (result.size() - 1));
+		out.println("MAX TREE DEPTH:"+ maxDepth);
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
 		

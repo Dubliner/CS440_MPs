@@ -178,7 +178,7 @@ public class Astar {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/trickysearch";//console().readLine();
+		String input = "src/MazeReadIn/smallMaze";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		ArrayList<String> result = new ArrayList<String>();
@@ -189,21 +189,27 @@ public class Astar {
 		while(myMaze.goals.size()>0){
 			
 			ArrayList<String> partialResult = BFS(myMaze, counter);
+			
 			if(firstLoop){
-				partialResult.addAll(result);
+				result = ArrayListHelper.add(partialResult, result);
+				
 				firstLoop = false;
-			}else
+			}else if(myMaze.goals.size()==1)
 			{
-				partialResult.addAll(result.subList(1, result.size()-1));
+				result = ArrayListHelper.add(partialResult, result);
 			}
-			result = partialResult;
+			else
+			{
+				result = ArrayListHelper.add(partialResult.subList(0, partialResult.size()-1), result);
+			}
+
 		}
-		
+		out.println("SOLUTION:");
 		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println("PATH LEN:" + result.size());
-
+		out.println("PATH LEN:" + (result.size() - 1));
+		out.println("MAX TREE DEPTH:"+ (result.size() - 1));
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
 		WriteMaze.writeSolution(input, result, output);

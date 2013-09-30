@@ -173,23 +173,25 @@ public class BFS {
 		counter.add(new Integer(0));
 		counter.add(new Integer(0));
 		while(myMaze.goals.size()>0){
-			
 			ArrayList<String> partialResult = BFS(myMaze, counter);
 			if(firstLoop){
-				partialResult.addAll(result);
+				result = ArrayListHelper.add(partialResult, result);
 				firstLoop = false;
-			}else
+			}else if(myMaze.goals.size()==1)
 			{
-				partialResult.addAll(result.subList(1, result.size()-1));
+				result = ArrayListHelper.add(partialResult, result);
 			}
-			result = partialResult;
+			else
+			{
+				result = ArrayListHelper.add(partialResult.subList(0, partialResult.size()-1), result);
+			}
 		}
-		
+		out.println("SOLUTION:");		
 		for(int i=0; i<result.size(); i++){			
 			out.println(result.get(i));
 		}
-		out.println("PATH LEN:" + result.size());
-
+		out.println("PATH LEN:" + (result.size() - 1));
+		out.println("MAX TREE DEPTH:"+ (result.size() - 1));
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
 
