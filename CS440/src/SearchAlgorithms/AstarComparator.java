@@ -8,6 +8,7 @@ import java.util.Comparator;
 
 import Heuristics.ManhattanDistance;
 import Heuristics.MultiGoalDistance;
+import Heuristics.NonAdmissiableDistance;
 import Heuristics.PreferLeftDistance;
 import Heuristics.PreferRightDistance;
 import MazeReadIn.Pair;
@@ -45,9 +46,9 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 	
 	/* Get heuristic for a point when there is only one goal */
 	public static double getDistance(Pair<Integer, Integer> start, Pair<Integer, Integer> goal){
-		//return PreferLeftDistance.getDistance(start);  
+		return PreferLeftDistance.getDistance(start);  
 		//return PreferRightDistance.getDistance(start); 
-		return ManhattanDistance.getDistance(start, goal);
+		//return ManhattanDistance.getDistance(start, goal);
 		
 	}
 
@@ -55,6 +56,7 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
 	public static double getDistance(Pair<Integer, Integer> start, ArrayList<Pair<Integer, Integer>> goals)
 	{
 		return MultiGoalDistance.getDistance(start, goals);
+		//return NonAdmissiableDistance.getDistance(start,goals);
 	}
 	
 	
@@ -64,9 +66,9 @@ public class AstarComparator implements Comparator<Pair<Integer, Integer>>
     	double xToGoal = getDistance(x, this.goals.get(0));
    	 	double yToGoal = getDistance(y, this.goals.get(0));
     	 //Multi goals
-//    	 double xToGoal = getDistance(x, this.goals);
-//    	 double yToGoal = getDistance(y, this.goals);
-//    	 
+ //   	 double xToGoal = getDistance(x, this.goals);
+ //   	 double yToGoal = getDistance(y, this.goals);
+    	 
     	 int xFromStart = this.cost[x.getFirst()][x.getSecond()];
     	 int yFromStart = this.cost[y.getFirst()][y.getSecond()];
     	 if (xToGoal+xFromStart < yToGoal+yFromStart)
