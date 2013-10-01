@@ -79,7 +79,7 @@ public class BFS {
 	/* findGoal: check if we find the goal */
 	
 	/* BFS Main function: */
-	public static ArrayList<String> BFS(Maze myMaze, ArrayList<Integer> counter){
+	public static ArrayList<String> BFS(Maze myMaze, ArrayList<Integer> counter, ArrayList<Pair<Integer, Integer>> reachedGoals ){
 
 		ArrayList<String> path = new ArrayList<String>();
 		int mazeWidth = myMaze.maze.length;
@@ -107,7 +107,8 @@ public class BFS {
 			// pop one element from queue, mark it visited
 			Pair checkCurr = myQueue.poll();
 			int currX = (int) checkCurr.getFirst();
-			int currY = (int) checkCurr.getSecond();			
+			int currY = (int) checkCurr.getSecond();	
+			System.out.println("DEBUG:" + currX + "," + currY);
 			canTravel[currX][currY] = 1;
 			
 			Integer nVisited = counter.get(0);
@@ -122,6 +123,7 @@ public class BFS {
 		            int goalX = g.getFirst();
 					int goalY = g.getSecond();
 					if(currX == goalX && currY == goalY ){
+						reachedGoals.add(new Pair<Integer, Integer>(goalX, goalY));
 						myMaze.start[0] = g.getFirst();
 						myMaze.start[1] = g.getSecond();
 						goalsIterator.remove();
@@ -164,7 +166,7 @@ public class BFS {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String input = "src/MazeReadIn/trickySearch";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		ArrayList<String> result = new ArrayList<String>();
@@ -172,14 +174,13 @@ public class BFS {
 		ArrayList<Integer> counter = new ArrayList<Integer>();
 		counter.add(new Integer(0));
 		counter.add(new Integer(0));
+		ArrayList<Pair<Integer, Integer>> reachedGoals = new ArrayList<Pair<Integer, Integer>>();
+		
 		while(myMaze.goals.size()>0){
-			ArrayList<String> partialResult = BFS(myMaze, counter);
+			ArrayList<String> partialResult = BFS(myMaze, counter, reachedGoals);
 			if(firstLoop){
 				result = ArrayListHelper.add(partialResult, result);
 				firstLoop = false;
-			}else if(myMaze.goals.size()==1)
-			{
-				result = ArrayListHelper.add(partialResult, result);
 			}
 			else
 			{
@@ -187,7 +188,7 @@ public class BFS {
 			}
 		}
 		out.println("SOLUTION:");		
-		for(int i=0; i<result.size(); i++){			
+		for(int i= result.size() - 1; i >= 0 ; i--){			
 			out.println(result.get(i));
 		}
 		out.println("PATH LEN:" + (result.size() - 1));
@@ -195,7 +196,8 @@ public class BFS {
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
 
-		WriteMaze.writeSolution(input, result, output);
+		//WriteMaze.writeSolution(input, result, output);
+		WriteMaze.writeSolution(input, result, output, reachedGoals);
 	}
 
 }

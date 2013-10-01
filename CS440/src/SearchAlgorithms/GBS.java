@@ -85,7 +85,7 @@ public class GBS {
 	/* findGoal: check if we find the goal */
 	
 	/* GBS Main function: */
-	public static ArrayList<String> BFS(Maze myMaze,Pair<Integer, Integer> currGoal, ArrayList<Integer> counter){
+	public static ArrayList<String> BFS(Maze myMaze,Pair<Integer, Integer> currGoal, ArrayList<Integer> counter, ArrayList<Pair<Integer, Integer>> reachedGoals){
 		int mazeWidth = myMaze.maze.length;
 		int mazeHeight = myMaze.maze[0].length;	
 		
@@ -132,6 +132,7 @@ public class GBS {
 			
 			// if so terminate
 			if(currX == goalX && currY == goalY ){
+				reachedGoals.add(new Pair<Integer, Integer>(goalX, goalY));
 				myMaze.goals.remove(currGoal);
 				break;			
 			}
@@ -177,7 +178,7 @@ public class GBS {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String input = "src/MazeReadIn/trickySearch";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		ArrayList<String> result = new ArrayList<String>();
@@ -187,8 +188,9 @@ public class GBS {
 		counter.add(new Integer(0));
 		counter.add(new Integer(-1));
 		Integer maxDepth = -1;
+		ArrayList<Pair<Integer, Integer>> reachedGoals = new ArrayList<Pair<Integer, Integer>>();
 		while(myMaze.goals.size()>0){
-			ArrayList<String> partialResult = BFS(myMaze, myMaze.goals.get(0),counter);
+			ArrayList<String> partialResult = BFS(myMaze, myMaze.goals.get(0),counter, reachedGoals);
 			if(maxDepth < counter.get(2))
 			{
 				maxDepth = counter.get(2);
@@ -196,9 +198,6 @@ public class GBS {
 			if(firstLoop){
 				result = ArrayListHelper.add(partialResult, result);
 				firstLoop = false;
-			}else if(myMaze.goals.size()==1)
-			{
-				result = ArrayListHelper.add(partialResult, result);
 			}
 			else
 			{
@@ -206,14 +205,16 @@ public class GBS {
 			}
 		}
 		out.println("SOLUTION:");		
-		for(int i=0; i<result.size(); i++){			
+		for(int i= result.size() - 1; i >= 0 ; i--){			
 			out.println(result.get(i));
 		}
-		out.println("PATH LEN:" + result.size());
+		out.println("PATH LEN:" + (result.size() - 1));
 		out.println("MAX TREE DEPTH:"+ maxDepth);
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
-		WriteMaze.writeSolution(input, result, output);
+	
+		//WriteMaze.writeSolution(input, result, output);
+		WriteMaze.writeSolution(input, result, output, reachedGoals);
 	}
 
 }

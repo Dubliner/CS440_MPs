@@ -78,7 +78,7 @@ public class DFS {
 	/* findGoal: check if we find the goal */
 	
 	/* BFS Main function: */
-	public static ArrayList<String> DFS(Maze myMaze, ArrayList<Integer> counter){
+	public static ArrayList<String> DFS(Maze myMaze, ArrayList<Integer> counter, ArrayList<Pair<Integer, Integer>> reachedGoals){
 		ArrayList<String> path = new ArrayList<String>();
 		int mazeWidth = myMaze.maze.length;
 		int mazeHeight = myMaze.maze[0].length;	
@@ -111,7 +111,6 @@ public class DFS {
 			int currX = (int) checkCurr.getFirst();
 			int currY = (int) checkCurr.getSecond();			
 			canTravel[currX][currY] = 1;
-			System.out.println("CURR: " + currX + "," + currY);
 			Integer nVisited = counter.get(0);
 			nVisited++;
 			counter.set(0, nVisited);
@@ -124,6 +123,7 @@ public class DFS {
 	            int goalX = g.getFirst();
 				int goalY = g.getSecond();
 				if(currX == goalX && currY == goalY ){
+					reachedGoals.add(new Pair<Integer, Integer>(goalX, goalY));
 					myMaze.start[0] = g.getFirst();
 					myMaze.start[1] = g.getSecond();
 					goalsIterator.remove();
@@ -178,7 +178,7 @@ public class DFS {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/smallMaze";//console().readLine();
+		String input = "src/MazeReadIn/trickySearch";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		ArrayList<String> result = new ArrayList<String>();
@@ -188,9 +188,11 @@ public class DFS {
 		counter.add(new Integer(0));
 		counter.add(new Integer(-1));
 		Integer maxDepth = -1;
+		ArrayList<Pair<Integer, Integer>> reachedGoals = new ArrayList<Pair<Integer, Integer>>();
+		
 		while(myMaze.goals.size()>0){
 			
-			ArrayList<String> partialResult = DFS(myMaze, counter);
+			ArrayList<String> partialResult = DFS(myMaze, counter, reachedGoals);
 			if(maxDepth < counter.get(2))
 			{
 				maxDepth = counter.get(2);
@@ -205,7 +207,7 @@ public class DFS {
 			result = partialResult;
 		}
 		
-		for(int i=0; i<result.size(); i++){			
+		for(int i= result.size() - 1; i >= 0 ; i--){			
 			out.println(result.get(i));
 		}
 		out.println("PATH LEN:" + (result.size() - 1));
@@ -213,7 +215,8 @@ public class DFS {
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
 		
-		WriteMaze.writeSolution(input, result, output);
+		//WriteMaze.writeSolution(input, result, output);
+		WriteMaze.writeSolution(input, result, output, reachedGoals);
 	}
 
 }

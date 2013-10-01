@@ -20,8 +20,6 @@ import MazeReadIn.ReadMaze;
 import MazeReadIn.WriteMaze;
 import static java.lang.System.*;
 
-
-
 /**
  * @author zhenchengwang
  * Data structure: 1, queue -> Queue<Pair<Integer, Integer>> myQueue
@@ -37,6 +35,7 @@ import static java.lang.System.*;
  *
  */
 public class Astar {
+	
 
 	/* 
 	 * canTravel: push adjacent node into queue, mark them as visited */
@@ -44,13 +43,14 @@ public class Astar {
 		
 			int currX = curr.getFirst();
 			int currY = curr.getSecond();
+			
 			 
 			if(currX+1<canTravel.length && canTravel[currX+1][currY]==0){
 				Pair<Integer, Integer> rightChild = new Pair(currX+1, currY);
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX+1)+","+currY+"";	
 				myMap.put(child, parent);
-				comparator.setCost(currX+1, currY, comparator.getCost(currX, currY)+1);
+				comparator.setCost(currX+1, currY, comparator.getCost(currX, currY)+getCost(currX + 1));
 				myQueue.offer(rightChild);
 			}
 			if(currY+1<canTravel[0].length && canTravel[currX][currY+1]==0){
@@ -58,7 +58,7 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY+1)+"";	
 				myMap.put(child, parent);
-				comparator.setCost(currX, currY+1, comparator.getCost(currX, currY)+1);
+				comparator.setCost(currX, currY+1, comparator.getCost(currX, currY)+getCost(currX));
 				myQueue.offer(upChild);
 			}
 			if(currX-1>=0 && canTravel[currX-1][currY]==0){
@@ -66,7 +66,7 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX-1)+","+currY+"";	
 				myMap.put(child, parent);
-				comparator.setCost(currX-1, currY, comparator.getCost(currX, currY)+1);
+				comparator.setCost(currX-1, currY, comparator.getCost(currX, currY)+getCost(currX - 1));
 				myQueue.offer(leftChild);
 			}
 			if(currY-1>=0 && canTravel[currX][currY-1]==0){
@@ -74,18 +74,25 @@ public class Astar {
 				String parent = ""+currX+","+currY+"";
 				String child = 	""+(currX)+","+(currY-1)+"";	
 				myMap.put(child, parent);
-				comparator.setCost(currX, currY-1, comparator.getCost(currX, currY)+1);
+				comparator.setCost(currX, currY-1, comparator.getCost(currX, currY)+getCost(currX));
 				myQueue.offer(downChild);
 			}
-				
+	
+	
 			return myQueue.size();	
 		
 	}
 	
+	private static double getCost(int x)
+	{
+		return 1.0; //unit step cost
+		//return Math.exp(x); //prefer left
+		//return 1.0 / Math.exp(x); //right	
+	}
 	/* findGoal: check if we find the goal */
 	
 	/* GBS Main function: */
-	public static ArrayList<String> BFS(Maze myMaze, ArrayList<Integer> counter){
+	public static ArrayList<String> BFS(Maze myMaze, ArrayList<Integer> counter, ArrayList<Pair<Integer, Integer>> reachedGoals){
 		
 		ArrayList<String> path = new ArrayList<String>();
 		int mazeWidth = myMaze.maze.length;
@@ -93,7 +100,7 @@ public class Astar {
 		
 		ArrayList<Pair<Integer, Integer>> myGoal = myMaze.goals;
 		Pair<Integer, Integer> myStart = new Pair<Integer, Integer>(myMaze.start[0], myMaze.start[1]);
-		int[][] compareCost = new int[mazeWidth][mazeHeight];
+		double[][] compareCost = new double[mazeWidth][mazeHeight];
         AstarComparator comparator = new AstarComparator(myStart,myGoal,compareCost);
 		PriorityQueue<Pair<Integer, Integer>> myQueue = new PriorityQueue<Pair<Integer, Integer>>(10,comparator); 
 		int[][] canTravel = new int[mazeWidth][mazeHeight];
@@ -110,6 +117,7 @@ public class Astar {
 					canTravel[i][j] = 0;
 			}
 		}
+		
 		for(int i=0; i<mazeWidth; i++){
 			for(int j=0; j<mazeHeight; j++){
 				comparator.setCost(i, j, Integer.MAX_VALUE);
@@ -136,12 +144,13 @@ public class Astar {
 		            int goalX = g.getFirst();
 					int goalY = g.getSecond();
 					if(currX == goalX && currY == goalY ){
+						reachedGoals.add(new Pair<Integer, Integer>(goalX, goalY));
 						myMaze.start[0] = g.getFirst();
 						myMaze.start[1] = g.getSecond();
+						System.out.println("COST:" +  compareCost[goalX][goalY]);
 						goalsIterator.remove();
 						found = true;
-						break;
-						
+						break;						
 					}
 		    }
 			// if so terminate
@@ -178,7 +187,7 @@ public class Astar {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		out.println("Please enter the maze you would like to run:");
-		String input = "src/MazeReadIn/mediumMaze";//console().readLine();
+		String input = "src/MazeReadIn/trickysearch2";//console().readLine();
 		String output = input+"Solution";
 		Maze myMaze = ReadMaze.parseMaze(input); // className.methodName
 		ArrayList<String> result = new ArrayList<String>();
@@ -186,17 +195,15 @@ public class Astar {
 		ArrayList<Integer> counter = new ArrayList<Integer>();
 		counter.add(new Integer(0));
 		counter.add(new Integer(0));
+		
+		ArrayList<Pair<Integer, Integer>> reachedGoals = new ArrayList<Pair<Integer, Integer>>();
 		while(myMaze.goals.size()>0){
 			
-			ArrayList<String> partialResult = BFS(myMaze, counter);
+			ArrayList<String> partialResult = BFS(myMaze, counter, reachedGoals);
 			
 			if(firstLoop){
-				result = ArrayListHelper.add(partialResult, result);
-				
+				result = ArrayListHelper.add(partialResult, result);				
 				firstLoop = false;
-			}else if(myMaze.goals.size()==1)
-			{
-				result = ArrayListHelper.add(partialResult, result);
 			}
 			else
 			{
@@ -205,14 +212,29 @@ public class Astar {
 
 		}
 		out.println("SOLUTION:");
-		for(int i=0; i<result.size(); i++){			
+		double cost = 0;
+		for(int i = result.size() - 1; i >= 0; i--){			
 			out.println(result.get(i));
+			
 		}
-		out.println("PATH LEN:" + (result.size() - 1));
+		
+		for(int i = result.size() - 2; i >= 0; i--){			
+
+			int currFirst = Integer.parseInt(result.get(i).split(",")[0]);
+			double thisCost = getCost(currFirst);
+			//System.out.println("2^" + currFirst + " = " +  thisCost);
+
+			cost += thisCost;
+			
+		}
+		out.println("PATH COST: " + cost);
+		//out.println("PATH LEN:" + (result.size() - 1));
 		out.println("MAX TREE DEPTH:"+ (result.size() - 1));
 		out.println("VISITED:"+ counter.get(0));
 		out.println("FRONTIER COUNT:"+ counter.get(1));
+		
 		WriteMaze.writeSolution(input, result, output);
+		//WriteMaze.writeSolution(input, result, output, reachedGoals);
 	}
 
 }
