@@ -7,14 +7,16 @@ public class Scheduler {
 	/**
 	 * This solves the scheduling CSP problem
 	 */
+	
 	public static void main(String[] args) {
 		
-		ProblemFileParser pfp = new ProblemFileParser("E:\\Fall2013Workspace\\Scheduler\\src\\problem3.txt");
+		ProblemFileParser pfp = new ProblemFileParser("E:\\CS440Github\\Scheduler\\src\\problem2.txt");
 		SchedulingProblem sp = pfp.GetProblem();
 		
 		ArrayList<Integer> counter = new ArrayList<Integer>();
 		counter.add(0);
 		HashMap<Integer, Integer> sol = backTracking(sp, counter);
+		
 		if(sol == null)
 		{
 			System.out.println("No Schedule!");
@@ -24,6 +26,7 @@ public class Scheduler {
 			{
 				System.out.println("Meeting " + key + " is scheduled at time " + sol.get(key));
 			}
+			sp.checkAssignmentCorrect();
 			System.out.println("Total Number of Assignments: " + counter.get(0));
 		}
 	}
@@ -44,7 +47,7 @@ public class Scheduler {
 		
 		Integer selectedVar;
 		ArrayList<Integer> mostConstrainedVars = csp.getMostConstrainedMeeting();
-		if(mostConstrainedVars.size() > 1)
+		if(mostConstrainedVars.size() != 1)
 		{
 			selectedVar = csp.getMostConstrainingMeeting(mostConstrainedVars);
 		}else
@@ -52,8 +55,11 @@ public class Scheduler {
 			selectedVar = mostConstrainedVars.get(0);
 		}
 		
-		for (Integer valueSlot : csp.OrderedTimeslots(selectedVar))
+		ArrayList<Integer> slots  = new ArrayList<Integer>();
+		slots.addAll(csp.OrderedTimeslots(selectedVar));
+		for (Integer valueSlot : slots)
 		{
+		//	if(selectedVar == 14 && valueSlot == 5)
 			if(csp.isValid(selectedVar, valueSlot)){
 				csp.addAssignment(selectedVar, valueSlot);
 				assignmentCount.set(0, assignmentCount.get(0) + 1);
@@ -62,6 +68,7 @@ public class Scheduler {
 					csp.removeAssignment(selectedVar);
 					return null;
 				}
+				
 				HashMap<Integer, Integer> result = backTracking(csp, assignmentCount);
 				if(result != null)
 				{

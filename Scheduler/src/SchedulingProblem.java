@@ -33,6 +33,45 @@ public class SchedulingProblem {
 		this.SlotsForMeetings = new HashMap<Integer, ArrayList<Integer>>();
 	}
 	
+	//Check if Assignment is Valid (for debugging purpose)
+	public void checkAssignmentCorrect()
+	{
+		boolean checkAssign = true;
+		for(Integer m: this.Assignment.keySet())
+		{
+			Integer t = this.Assignment.get(m);
+			for(Integer cm: this.getConnectedMeetings(m))
+			{
+				if(t == this.Assignment.get(cm))
+				{
+					checkAssign = false;
+					break;
+				}
+			}
+		}
+		if(checkAssign)
+		{
+			for (Integer e: this.EmployeeMeetingMap.keySet())
+			{
+				ArrayList<Integer> meetingsForE = this.EmployeeMeetingMap.get(e);
+				for(Integer meeting: this.Assignment.keySet()){
+					if(meetingsForE.contains(meeting))
+					{
+						if(!checkValidForOneEmployee(meeting, this.Assignment.get(meeting), meetingsForE))
+						{
+							checkAssign = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		if(checkAssign)
+			System.out.println("TESTING: Assignment is Valid");
+		else
+			System.out.println("TESTING: Assignment is NOT valid");
+	}
+	
 	/*
 	 * Add a meeting assigenement
 	 * */
@@ -48,18 +87,12 @@ public class SchedulingProblem {
 		{
 			ArrayList<Integer> mSlots = this.SlotsForMeetings.get(m);
 			mSlots.remove(timeSlot);
-			//Removing time slots that are limited by travel time
-			Integer travelTime = this.TravelTimes.get(meeting - 1).get(m - 1);
-			for(Integer k = 1 ; k <= travelTime; k++)
-			{
-				Integer o1 = timeSlot + k;
-				mSlots.remove(o1);
-				Integer o2 = timeSlot - k;
-				mSlots.remove(o2);
-			}
+//			Integer i1 = timeSlot + 1;
+//			mSlots.remove(i1);
+//			Integer i2 = timeSlot - 1;
+//			mSlots.remove(i2);
 			this.SlotsForMeetings.put(m, mSlots);
 		}
-		
 	}
 	
 	/*
@@ -82,34 +115,37 @@ public class SchedulingProblem {
 		ArrayList<Integer> connectedMeetings = this.getConnectedMeetings(meeting);
 		for(Integer cm: connectedMeetings)
 		{
-			Integer travelTime = this.TravelTimes.get(cm - 1).get(meeting - 1);
 			if(this.Assignment.containsKey(cm)) // for meetings that already assigned
 			{
 				ArrayList<Integer> allSlots = this.SlotsForMeetings.get(meeting);
 				Integer cmSlot = this.Assignment.get(cm);
 				allSlots.remove(cmSlot);
-				for(Integer k = 1 ; k <= travelTime; k++)
-				{
-					Integer o1 = cmSlot + k;
-					allSlots.remove(o1);
-					Integer o2 = cmSlot - k;
-					allSlots.remove(o2);
-				}
+//				Integer i1 = cmSlot + 1;
+//				allSlots.remove(i1);
+//				Integer i2 = cmSlot - 1;
+//				allSlots.remove(i2);
+				
 				this.SlotsForMeetings.put(meeting, allSlots);
-			}else //not assigned, connected meetings
+			}
+			else //not assigned, connected meetings
 			{
 				ArrayList<Integer> cmSlots = this.SlotsForMeetings.get(cm);
 				if(!cmSlots.contains(timeslot))
-					cmSlots.add(timeslot);
-				for(Integer k = 1; k <= travelTime; k++)
 				{
-					Integer o1 = timeslot + k;
-					if(o1 <= this.NumTimeSlots && !cmSlots.contains(o1))
-						cmSlots.add(o1);
-					Integer o2 = timeslot - k;
-					if(o2 > 0 && !cmSlots.contains(o2))
-						cmSlots.add(o2);
+					cmSlots.add(timeslot);
+//					Integer i1 = timeslot - 1;
+//					if(i1 > 0 && !cmSlots.contains(i1))
+//					{
+//						cmSlots.add(i1);
+//					}
+//					
+//					Integer i2 = timeslot + 1;
+//					if(i2 <= this.NumTimeSlots && !cmSlots.contains(i2))
+//					{
+//						cmSlots.add(i2);
+//					}
 				}
+
 				ArrayList<Integer> cmConnectedMeetings = this.getConnectedMeetings(cm);
 				for(Integer cmcm: cmConnectedMeetings)
 				{
@@ -117,14 +153,10 @@ public class SchedulingProblem {
 					{
 						Integer rmSlot = this.Assignment.get(cmcm);
 						cmSlots.remove(rmSlot);
-						Integer tt = this.TravelTimes.get(cmcm - 1).get(cm - 1);
-						for(Integer k = 1 ; k <= tt; k++)
-						{
-							Integer o1 = rmSlot + k;
-							cmSlots.remove(o1);
-							Integer o2 = rmSlot - k;
-							cmSlots.remove(o2);
-						}
+//						Integer i1 = rmSlot + 1;
+//						cmSlots.remove(i1);
+//						Integer i2 = rmSlot - 1;
+//						cmSlots.remove(i2);
 					}
 				}
 				this.SlotsForMeetings.put(cm, cmSlots);
@@ -209,12 +241,7 @@ public class SchedulingProblem {
 	 * */
 	public Collection<Integer> OrderedTimeslots(Integer meeting)
 	{
-		ArrayList<Integer> unassignedSlots = new ArrayList<Integer>();
-
-		for(Integer i = 1; i <= this.NumTimeSlots; i ++)
-		{
-				unassignedSlots.add(i);			
-		}
+		ArrayList<Integer> unassignedSlots = this.SlotsForMeetings.get(meeting);
 		
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 		for(Integer us: unassignedSlots)
@@ -237,25 +264,98 @@ public class SchedulingProblem {
 	 * Checking if an assignment is valid - satisfying all the constrains
 	 * */
 	public boolean isValid(Integer meeting, Integer timeslot)
-	{	
+	{
 		ArrayList<Integer> connectedMeetings = this.getConnectedMeetings(meeting);
 		for(Integer m: connectedMeetings)
 		{
 			if(this.Assignment.containsKey(m)){
-				//Checking this timeslot is not taken by any meetings 
-				//which is connected with this meeting and is already assigned to this timeslot
 				Integer cmTimeslot = this.Assignment.get(m);
 				if( cmTimeslot == timeslot)
 				{
 					return false;
 				}
-	
-				//Checking this timeslot is not violating travel time constrain
-				Integer travelTime = this.TravelTimes.get(meeting - 1).get(m - 1);
-				if(Math.abs(timeslot - cmTimeslot) < travelTime)
+			}
+		}
+
+		for (Integer e: this.EmployeeMeetingMap.keySet())
+		{
+			ArrayList<Integer> meetingsForE = this.EmployeeMeetingMap.get(e);
+			if(meetingsForE.contains(meeting))
+			{
+				if(!checkValidForOneEmployee(meeting, timeslot, meetingsForE))
 				{
 					return false;
 				}
+			}
+		}
+		return true;
+	}
+	private boolean lastCheckValid(ArrayList<Integer> meetings, Integer m1, Integer tt1, Integer m2, Integer tt2)
+	{
+		for(Integer m: meetings)
+		{
+			if(!this.Assignment.containsKey(m))
+			{
+				ArrayList<Integer> availableSlots = this.SlotsForMeetings.get(m);
+				for(Integer s: availableSlots)
+				{
+					if(tt1 < s && s < tt2)
+					{
+						if(this.TravelTimes.get(m - 1).get(m1 - 1)< s - tt1 && this.TravelTimes.get(m - 1).get(m2 - 1)< tt2 - s)
+						{
+							return true;
+						}
+					}
+					if(tt2 < s && s < tt1)
+					{
+						if(this.TravelTimes.get(m - 1).get(m2 - 1)< s - tt2 && this.TravelTimes.get(m - 1).get(m1 - 1) < tt1 - s)
+						{
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+	//TODO: bug - need to consider when later unassigned meeting in meetings gets assigned, (meeting,timeslot) might become valid
+	private boolean checkValidForOneEmployee(Integer meeting, Integer timeslot, ArrayList<Integer> meetings)
+	{
+		Integer leftNeighbor = -1;
+		Integer rightNeighbor = -1;
+		Integer leftTime = Integer.MIN_VALUE;
+		Integer rightTime = Integer.MAX_VALUE;
+		for(Integer m: meetings)
+		{
+			if(this.Assignment.containsKey(m))
+			{
+				Integer thisTime = this.Assignment.get(m);
+				if(thisTime > leftTime && thisTime < timeslot)
+				{
+					leftNeighbor = m;
+					leftTime = thisTime;
+				}
+				if(thisTime < rightTime && thisTime > timeslot)
+				{
+					rightNeighbor = m;
+					rightTime = thisTime;
+				}
+			}
+		}
+		if(leftNeighbor != -1)
+		{
+			Integer tt = this.TravelTimes.get(leftNeighbor - 1).get(meeting - 1);
+			if(Math.abs(timeslot - leftTime) <= tt && !lastCheckValid(meetings, leftNeighbor, leftTime, meeting, timeslot))
+			{
+				return false;
+			}
+		}
+		if(rightNeighbor != -1)
+		{
+			Integer tt = this.TravelTimes.get(rightNeighbor - 1).get(meeting - 1);
+			if(Math.abs(rightTime - timeslot) <= tt && !lastCheckValid(meetings, rightNeighbor, rightTime, meeting, timeslot))
+			{
+				return false;
 			}
 		}
 		return true;
@@ -316,23 +416,58 @@ public class SchedulingProblem {
 			System.out.println(line);
 		}
 	}
-}
+	
+	//For debugging ProblemGenerator
+	public void printProblem()
+	{
+		System.out.println("Number of meetings: " + this.NumMeetings);
+		System.out.println("Number of employees: " + this.NumEmployees);
+		System.out.println("Number of time slots: " + this.NumTimeSlots);
+		
+		System.out.println("Meetings each employee must attend:");
+		for(Integer e : this.EmployeeMeetingMap.keySet())
+		{
+			ArrayList<Integer> meetings = this.EmployeeMeetingMap.get(e);
+			System.out.print(e + ":");
+			for(Integer m: meetings)
+			{
+				System.out.print(" " + m);
+			}
+			System.out.println();
+		}
+		
+		System.out.println("Travel time between meetings: ");
+		System.out.print("    ");
+		for(Integer i = 1; i <= this.NumMeetings; i++)
+		{
+			System.out.print(i + " ");
+		}
+		System.out.println();
+		for(Integer i = 0; i < this.NumMeetings; i++)
+		{
+			System.out.print((i + 1) + ":   ");
+			for(Integer j = 0; j < this.NumMeetings; j++)
+			{
+				System.out.print(this.TravelTimes.get(i).get(j) + " ");
+			}
+			System.out.println();
+		}
+	}
 
-/*
- * A comparator class for sorting the hash table
- * */
-class ValueComparator implements Comparator<Integer> {
-
-    Map<Integer, Integer> base;
-    public ValueComparator(Map<Integer, Integer> base) {
-        this.base = base;
-    }
-   
-    public int compare(Integer a, Integer b) {
-        if (base.get(a) >= base.get(b)) {
-            return -1;
-        } else {
-            return 1;
-        } 
-    }
+	/*For ProblemGenerator*/
+	public ArrayList<Integer> sortMeetingsForEByTime(ArrayList<Integer> meetings)
+	{
+		HashMap<Integer, Integer> meetingTimeMap = new HashMap<Integer, Integer>();
+		for(Integer m: meetings)
+		{
+			meetingTimeMap.put(m, this.Assignment.get(m));
+		}
+		
+		TreeMap<Integer, Integer> sortedMap = new TreeMap<Integer, Integer>(new ValueComparator(meetingTimeMap));
+		sortedMap.putAll(meetingTimeMap);
+		
+		ArrayList<Integer> ret = new ArrayList<Integer>();
+		ret.addAll(sortedMap.keySet());
+		return ret;
+	}
 }

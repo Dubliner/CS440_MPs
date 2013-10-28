@@ -1,0 +1,78 @@
+Assignment Solution: 
+Meeting 1is at time 1
+Meeting 2is at time 3
+Meeting 3is at time 1
+Meeting 4is at time 3
+Meeting 5is at time 2
+Meeting 6is at time 8
+Meeting 7is at time 2
+Meeting 8is at time 2
+Meeting 9is at time 6
+Meeting 10is at time 7
+Meeting 11is at time 9
+Meeting 12is at time 4
+Meeting 13is at time 2
+Meeting 14is at time 5
+Meeting 15is at time 2
+Meeting 17is at time 7
+Meeting 16is at time 2
+Meeting 19is at time 4
+Meeting 18is at time 6
+Meeting 20is at time 2
+TESTING: Assignment is Valid
+Number of meetings: 20
+Number of employees: 30
+Number of time slots: 9
+Meetings each employee must attend:
+1: 16 9 6
+2: 15 19 9
+3: 16 9 6
+4: 3 6 12
+5: 3 17 19
+6: 11 8 10 19
+7: 13 6 12
+8: 4 6 1
+9: 3 18 12
+10: 10 7
+11: 19 7 18 6
+12: 18 15 19 6
+13: 8 10 11
+14: 2 17
+15: 2 10 3
+17: 7 12 17
+16: 1 2 17
+19: 11 12 16 9
+18: 6 2 14 1
+21: 4 6 3
+20: 3 14 4
+23: 1 14 4 11
+22: 20 14 11
+25: 5 18 6
+24: 6 20 9
+27: 7 11 9
+26: 9 8
+29: 16 18 19
+28: 20 6 12
+30: 1 6 4 14
+Travel time between meetings: 
+    1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
+1:   0 1 2 1 4 4 3 2 2 1 4 4 1 1 2 1 2 1 3 3 
+2:   1 0 1 1 3 3 1 4 2 3 4 3 4 1 4 1 3 1 4 2 
+3:   2 1 0 1 1 2 3 1 3 1 2 2 4 4 4 2 3 4 2 1 
+4:   1 1 1 0 2 4 3 3 3 4 4 4 1 1 3 4 4 4 3 1 
+5:   4 3 1 2 0 1 1 3 3 3 2 1 2 3 1 1 1 3 3 2 
+6:   4 3 2 4 1 0 2 3 1 4 4 3 4 2 1 2 1 1 2 4 
+7:   3 1 3 3 1 2 0 1 3 4 4 1 4 1 4 2 2 1 1 4 
+8:   2 4 1 3 3 3 1 0 3 4 2 1 3 3 2 4 4 3 1 4 
+9:   2 2 3 3 3 1 3 3 0 1 2 1 1 1 3 3 1 1 1 3 
+10:   1 3 1 4 3 4 4 4 1 0 1 4 2 3 2 4 3 2 2 3 
+11:   4 4 2 4 2 4 4 2 2 1 0 3 1 3 4 3 3 4 1 1 
+12:   4 3 2 4 1 3 1 1 1 4 3 0 1 3 3 1 2 1 1 1 
+13:   1 4 4 1 2 4 4 3 1 2 1 1 0 3 2 1 1 1 2 1 
+14:   1 1 4 1 3 2 1 3 1 3 3 3 3 0 4 2 2 2 2 2 
+15:   2 4 4 3 1 1 4 2 3 2 4 3 2 4 0 3 3 3 1 2 
+16:   1 1 2 4 1 2 2 4 3 4 3 1 1 2 3 0 4 1 1 3 
+17:   2 3 3 4 1 1 2 4 1 3 3 2 1 2 3 4 0 4 2 3 
+18:   1 1 4 4 3 1 1 3 1 2 4 1 1 2 3 1 4 0 1 4 
+19:   3 4 2 3 3 2 1 1 1 2 1 1 2 2 1 1 2 1 0 4 
+20:   3 2 1 1 2 4 4 4 3 3 1 1 1 2 2 3 3 4 4 0 
