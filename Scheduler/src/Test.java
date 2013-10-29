@@ -21,7 +21,7 @@ public class Test {
 		System.out.println("CONNECTED MEETINGS: " + sp.getConnectedMeetings(1).toString());
 		System.out.println("MOST CONSTRAINED MEETING: " + sp.getMostConstrainedMeeting());
 		
-		System.out.println("ISVALID:" + sp.isValid(5, 1));
+		//System.out.println("ISVALID:" + sp.isValid(5, 1));
 //		
 //		sp.removeAssignment(1);
 //		System.out.println("PRINTING SLOTS FOR MEETINGS");

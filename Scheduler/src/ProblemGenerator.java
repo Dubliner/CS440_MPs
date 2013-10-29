@@ -18,8 +18,8 @@ public class ProblemGenerator {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		//SchedulingProblem sp = Generate(30,20,9);
-		SchedulingProblem sp = Generate(50,40,20);
-		//SchedulingProblem sp = Generate(40,30,20);
+		//SchedulingProblem sp = Generate(50,40,20);
+		SchedulingProblem sp = Generate(40,30,20);
 		
 		sp.printProblem();
 		
@@ -148,7 +148,8 @@ public class ProblemGenerator {
 					csp.TravelTimes.get(i).set(j,0);
 				}else
 				{
-					Integer rnd = new Random().nextInt(csp.NumTimeSlots/2) + 1;
+					Integer rnd = new Random().nextInt(4);
+					if(rnd == 0) rnd = 1;
 					csp.TravelTimes.get(i).set(j, rnd);
 					csp.TravelTimes.get(j).set(i, rnd);
 				}
@@ -172,12 +173,7 @@ public class ProblemGenerator {
 				Integer newTT = timeDiff - 1;
 				if(currTT != 0)
 				{
-					csp.TravelTimes.get(m1 - 1).set(m2 - 1, newTT);
-					csp.TravelTimes.get(m2 - 1).set(m1 - 1, newTT);
-				}
-				else
-				{
-					if(currTT < newTT){
+					if(currTT > newTT){
 						csp.TravelTimes.get(m1 - 1).set(m2 - 1, newTT);
 						csp.TravelTimes.get(m2 - 1).set(m1 - 1, newTT);
 					}

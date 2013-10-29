@@ -342,6 +342,7 @@ public class SchedulingProblem {
 				}
 			}
 		}
+		
 		if(leftNeighbor != -1)
 		{
 			Integer tt = this.TravelTimes.get(leftNeighbor - 1).get(meeting - 1);

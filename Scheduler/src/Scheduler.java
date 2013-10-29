@@ -1,3 +1,11 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -7,10 +15,25 @@ public class Scheduler {
 	/**
 	 * This solves the scheduling CSP problem
 	 */
-	
+	static BufferedWriter writer;
 	public static void main(String[] args) {
 		
-		ProblemFileParser pfp = new ProblemFileParser("E:\\CS440Github\\Scheduler\\src\\problem2.txt");
+		
+		try {
+			File file = new File("debug.txt");
+	          writer = new BufferedWriter(new FileWriter(file));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ProblemFileParser pfp = new ProblemFileParser("E:\\CS440Github\\Scheduler\\src\\simple.txt");
 		SchedulingProblem sp = pfp.GetProblem();
 		
 		ArrayList<Integer> counter = new ArrayList<Integer>();
@@ -28,6 +51,12 @@ public class Scheduler {
 			}
 			sp.checkAssignmentCorrect();
 			System.out.println("Total Number of Assignments: " + counter.get(0));
+		}
+		try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -59,10 +88,15 @@ public class Scheduler {
 		slots.addAll(csp.OrderedTimeslots(selectedVar));
 		for (Integer valueSlot : slots)
 		{
-		//	if(selectedVar == 14 && valueSlot == 5)
 			if(csp.isValid(selectedVar, valueSlot)){
 				csp.addAssignment(selectedVar, valueSlot);
 				assignmentCount.set(0, assignmentCount.get(0) + 1);
+//				try {
+//					writer.write("ASSIGNMENT: " + csp.Assignment.toString() + "\n");
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				if(csp.fowardChecking() == false)
 				{
 					csp.removeAssignment(selectedVar);
