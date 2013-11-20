@@ -10,6 +10,25 @@ public class Face {
 		this.isFace = false;
 	}
 	
+	public String Print()
+	{
+		String face = "";
+		for(int i = 0; i < 70; i ++)
+		{
+			for(int j = 0; j < 60; j++)
+			{
+				if(this.faceImage[i][j]==0){
+					face += " ";
+				}else if(this.faceImage[i][j]==1)
+				{
+					face += "#";
+				}
+			}
+			face += "\n";
+		}
+		return face;
+	}
+	
 	/**
 	 * @param args
 	 */

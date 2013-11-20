@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -10,6 +13,40 @@ public class Main {
 	private static ArrayList<Face> testingFaces;
 	
 	private static int smoothingK = 1;
+	private static final int FACE_HEIGHT = 70;
+	private static final int FACE_WIDTH = 60;
+	
+	
+	
+	/*
+	 * odds(Fij=1, c1, c2) = P(Fij=1 | c1) / P(Fij=1 | c2). c1 is Face class, c2 is Non-face class
+	 * for the odds ratio map, you can use '+' to denote features with positive log odds,
+	 * ' ' for features with log odds close to 1, and '-' for features with negative log odds
+	 */
+	public static void DrawOddsRatioImage()
+	{
+		System.out.println("face vs non-face odds ratio image:");
+		for(int i = 0; i < FACE_HEIGHT; i++)
+		{
+			for(int j = 0; j < FACE_WIDTH; j++)
+			{
+				double odds = Math.log(isFaceProbilities[i][j]/nonFaceProbilities[i][j]);
+				String denote = "#";
+				if(odds >= -0.05 && odds <= 0.05)
+				{
+					denote = " ";
+				}else if(odds > 0)
+				{
+					denote = "+";
+				}else if(odds < 0)
+				{
+					denote = "-";
+				}
+				System.out.print(denote);
+			}
+			System.out.println();
+		}
+	}
 	
 	public static double[][] GetConfusionMatrix()
 	{
@@ -69,9 +106,9 @@ public class Main {
 		int[][] testingData = testingFace.faceImage;
 		double isFacePosteriorVal = Math.log(0.5);
 		double nonFacePosteriorVal = Math.log(0.5);
-		for(int i = 0; i < 70; i++)
+		for(int i = 0; i < FACE_HEIGHT; i++)
 		{
-			for(int j = 0; j < 60; j++)
+			for(int j = 0; j < FACE_WIDTH; j++)
 			{
 				isFacePosteriorVal += Math.log(GetTrainingLikelyhood(i, j, testingData[i][j], true));
 				nonFacePosteriorVal += Math.log(GetTrainingLikelyhood(i, j, testingData[i][j], false));
@@ -91,16 +128,30 @@ public class Main {
 	
 	public static double Testing()
 	{
-		int correctTests = 0;
-		for(Face f: testingFaces)
-		{
-			if(TestingSingleFaceCorrect(f))
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter("WrongTestingFaces.txt"));
+			
+			int correctTests = 0;
+			for(Face f: testingFaces)
 			{
-				correctTests++;
+				if(TestingSingleFaceCorrect(f))
+				{
+					correctTests++;
+				}else
+				{
+					String faceStr = f.Print();//printing wrong face
+					out.write(faceStr);
+					out.write("Above face is supposed to be " + f.isFace);
+					out.newLine();
+				}
 			}
+			//System.out.println((double)correctTests/(double)testingFaces.size());
+			out.close();
+			return (double)correctTests/(double)testingFaces.size();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		//System.out.println((double)correctTests/(double)testingFaces.size());
-		return (double)correctTests/(double)testingFaces.size();
+		return -1;
 	}
 	public static void Training()
 	{
@@ -113,8 +164,8 @@ public class Main {
 		testingFaces = FileParser.Parse("E:\\CS440Github\\FaceClassification\\src\\facedatatest", 
 				"E:\\CS440Github\\FaceClassification\\src\\facedatatestlabels");
 
-		isFaceProbilities = new double[70][60];
-		nonFaceProbilities = new double[70][60];
+		isFaceProbilities = new double[FACE_HEIGHT][FACE_WIDTH];
+		nonFaceProbilities = new double[FACE_HEIGHT][FACE_WIDTH];
 		
 		double isFaceClassSize = 0;
 		double nonFaceClassSize = 0;
@@ -132,9 +183,9 @@ public class Main {
 		System.out.println("is face class size:" + isFaceClassSize);
 		System.out.println("non face class size:" + nonFaceClassSize);
 		
-		for(int i = 0; i < 70; i++)
+		for(int i = 0; i < FACE_HEIGHT; i++)
 		{
-			for(int j = 0; j < 60; j++)
+			for(int j = 0; j < FACE_WIDTH; j++)
 			{
 				//checking pixel(i,j) for all faces
 				double numHasValPixelsIsFace = 0;
@@ -186,6 +237,7 @@ public class Main {
 		TestingWithDiffSmoothing();
 		//System.out.println(Math.log(4));
 		GetConfusionMatrix();
+		DrawOddsRatioImage();
 	}
 	
 	public static void TestingWithDiffSmoothing()
