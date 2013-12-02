@@ -8,6 +8,7 @@ public class State {
 	public boolean IsWall;
 	public int XCoord;
 	public int YCoord;
+	public int TimeStep;
 
 	private int numUpTaken;
 	private int numDownTaken;
@@ -22,6 +23,7 @@ public class State {
 
 	public State(int x, int y)
 	{
+		this.TimeStep = 1;
 		this.XCoord = x;
 		this.YCoord = y;
 		this.IsWall = false;

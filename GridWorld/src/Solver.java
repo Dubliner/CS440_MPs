@@ -85,15 +85,16 @@ public class Solver {
 	
 	public void ReinforcementLearning()
 	{
-		int timeStep = 1;
+		int step = 1;
 		State currState = this.game.StartState;
 		
-		while(timeStep < 100000)
+		while(step < 400000)
 		{	
+			currState.TimeStep = currState.TimeStep + 1;
 			ACTION selectedAction = this.selectAction(currState);
 			currState.CountActionTaken(selectedAction);
 			State nextState = this.getSuccessorState(currState, selectedAction);
-			this.TDUpdate(currState, nextState, selectedAction, timeStep);
+			this.TDUpdate(currState, nextState, selectedAction);
 		
 			currState = nextState;
 			if(currState.IsTerminal)
@@ -101,7 +102,7 @@ public class Solver {
 				currState = this.game.StartState;
 			}
 			
-			timeStep++;
+			step++;
 		}
 	}
 	
@@ -110,7 +111,8 @@ public class Solver {
 		int Ne = 50; 
 		if (numTimesTaken < Ne)
 		{
-			return Integer.MAX_VALUE;
+			//return Integer.MAX_VALUE;
+			return (double)Ne*1.5/(double)numTimesTaken;
 		}else
 		{
 			return expectedUtil;
@@ -122,9 +124,9 @@ public class Solver {
 		return 60.0/(59.0 + timeStep);//TODO: TRY DIFF
 	}
 	
-	private void TDUpdate(State currState, State succState, ACTION selectedAction, int timeStep) 
+	private void TDUpdate(State currState, State succState, ACTION selectedAction) 
 	{
-		double alpha = this.getAlpha(timeStep);
+		double alpha = this.getAlpha(currState.TimeStep);
 		double currQ = currState.GetQValue(selectedAction);
 		double discountFactor = 0.7;
 		double maxQForSucc;
