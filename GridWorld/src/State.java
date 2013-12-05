@@ -19,7 +19,7 @@ public class State {
 	public ACTION OptimalPolicy;
 	public boolean IsTerminal;
 	
-	private static final double DEFAULT_REWARD = -0.114;
+	private static final double DEFAULT_REWARD = -0.04;
 
 	public State(int x, int y)
 	{
@@ -41,6 +41,7 @@ public class State {
 		QValues.put(ACTION.LEFT, 0.0);
 		QValues.put(ACTION.RIGHT, 0.0);
 	}
+	
 	
 	public double GetQValue(ACTION action)
 	{

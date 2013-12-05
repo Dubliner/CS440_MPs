@@ -11,11 +11,12 @@ public class Game {
 	//Policy
 	public State StartState;
 
-	public Game()
+	public Game(int version)
 	{
 	//	testGameInit();
-		init();
+		init(version);
 	}
+	
 	public void printQLearning()
 	{
 		for(int i = 0; i < this.States.length; i++)
@@ -107,7 +108,7 @@ public class Game {
 		this.States[1][1].IsWall = true;
 		this.StartState = this.States[0][0];
 	}
-	private void init()
+	private void init(int version)
 	{
 		//Initializing Game States according to the given Grid in the Spec
 		this.States = new State[6][6];
@@ -125,7 +126,12 @@ public class Game {
 		this.States[3][1].SetReward(-1);
 		this.States[5][1].SetReward(-1);
 		this.States[5][0].SetReward(1);
+		if(version == 1){
 		this.States[5][5].SetReward(1);
+		}else
+		{
+			this.States[5][5].SetReward(10);
+		}
 //
 		this.States[2][0].SetUtility(-1);		
 		this.States[3][0].SetUtility(-1);
@@ -148,26 +154,65 @@ public class Game {
 		this.States[3][5].IsWall = true;	
 	}
 	
+	public boolean IsOutBound(State state)
+	{
+		return (state.XCoord < 0 || state.XCoord >= this.States.length || state.YCoord < 0 || state.YCoord >= this.States[0].length);
+	}
+	
+	public State GetNextState(State currState, ACTION actionTaken)
+	{
+		int nextX;
+		int nextY;
+		
+		if(actionTaken == ACTION.UP)
+		{
+			nextX = currState.XCoord;
+			nextY = currState.YCoord + 1;
+		}else if(actionTaken == ACTION.DOWN)
+		{
+			nextX = currState.XCoord;
+			nextY = currState.YCoord - 1;
+		}else if(actionTaken == ACTION.LEFT)
+		{
+			nextX = currState.XCoord - 1;
+			nextY = currState.YCoord;
+		}else
+		{
+			nextX = currState.XCoord + 1;
+			nextY = currState.YCoord;
+		}
+		
+		if(nextX < 0 || nextX >= this.States.length || nextY < 0 || nextY >= this.States[0].length)
+		{
+			return new State(nextX, nextY); 
+		}else{
+			return this.States[nextX][nextY];
+		}
+	}
+	
 	public ArrayList<State> GetNeighborStates(State currState)
 	{
 		ArrayList<State> states = new ArrayList<State>();
-		if(currState.XCoord - 1 >= 0)
-		{
-			states.add(this.States[currState.XCoord - 1][currState.YCoord]);
-			
-		}
-		if(currState.XCoord + 1 < this.States.length)
-		{
-			states.add(this.States[currState.XCoord + 1][currState.YCoord]);
-		}
-		if(currState.YCoord - 1 >= 0)
-		{
-			states.add(this.States[currState.XCoord][currState.YCoord - 1]);
-		}
-		
-		if(currState.YCoord + 1 < this.States[0].length)
-		{
-			states.add(this.States[currState.XCoord][currState.YCoord + 1]);
+//		if(currState.XCoord - 1 >= 0)
+//		{
+//			states.add(this.States[currState.XCoord - 1][currState.YCoord]);
+//			
+//		}
+//		if(currState.XCoord + 1 < this.States.length)
+//		{
+//			states.add(this.States[currState.XCoord + 1][currState.YCoord]);
+//		}
+//		if(currState.YCoord - 1 >= 0)
+//		{
+//			states.add(this.States[currState.XCoord][currState.YCoord - 1]);
+//		}
+//		
+//		if(currState.YCoord + 1 < this.States[0].length)
+//		{
+//			states.add(this.States[currState.XCoord][currState.YCoord + 1]);
+//		}
+		for(ACTION action: ACTION.values()){
+			states.add(this.GetNextState(currState, action));
 		}
 		return states;
 	}

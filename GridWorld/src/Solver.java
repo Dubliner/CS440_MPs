@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class Solver {
 
 	private Game game;
-	
+	private double discountFactor = 0.7;
 	
 	public Solver(Game game)
 	{
@@ -18,34 +18,60 @@ public class Solver {
 	 */
 	public static void main(String[] args) {
 		
-		Game game = new Game();
+		//Game game = new Game(1); //PART1.1& 1.2
+		Game game = new Game(2); //PART 1.3
+		
+		//PART 1.1
 		Solver gameSolver = new Solver(game);
-		gameSolver.ValueIteration();
+		System.out.println("Value Iteration:");
+		double[][] valIterUtils = gameSolver.ValueIteration();
 		game.printUtilities();
-		gameSolver.ReinforcementLearning();
-		//game.printQLearning();
+		
+		//PART 1.2
+		double[][] QLearnUtils = gameSolver.ReinforcementLearning();
+		System.out.println("TD Q-Learning Utilities:");
 		game.printUtilities();
+		System.out.println("TD Q-Learning Q Values:");
+		game.printQLearning();
+		System.out.println("RMSE :" + calcRMSE(valIterUtils, QLearnUtils, game.States.length, game.States[0].length));
+		
 	}
 	
+	private static double calcRMSE(double[][] estimateUtils, double[][] trueUtils , int xlen, int ylen)
+	{
+		double err = 0.0;
+		
+		for(int i = 0; i < xlen; i++)
+		{
+			for(int j = 0; j < ylen; j++)
+			{
+				double temp = (estimateUtils[i][j] - trueUtils[i][j])*(estimateUtils[i][j] - trueUtils[i][j]);
+				err += temp;
+			}
+		}
+		
+		return err/(xlen * ylen);
+	}
 	
 	private void SetNewUtilityWithBellman(State currState)
 	{
-		double discountFactor = 0.7;
+		
 		double maxExpectedUtility = Integer.MIN_VALUE;
 
 		
-		for(ACTION action : this.game.GetPossibleActions(currState))
+		for(ACTION action : ACTION.values())
 		{
 			double sumU = 0.0;
 			for(State nextState: this.game.GetNeighborStates(currState))
 			{
-				if(!nextState.IsWall){
+				if(!this.game.IsOutBound(nextState) && !nextState.IsWall){
 					sumU += this.game.GetProbability(currState, action, nextState) * nextState.GetUtility();
 				}else
 				{
 					sumU += this.game.GetProbability(currState, action, nextState) * currState.GetUtility();
 				}
 			}
+			
 			
 			if(sumU > maxExpectedUtility)
 			{
@@ -58,10 +84,11 @@ public class Solver {
 		currState.SetUtility(newUtil);
 	}
 	
-	public void ValueIteration()
+	public double[][] ValueIteration()
 	{
-		int numIteration = 50;
+		int numIteration = 25;
 		int iter = 0;
+		double[][] allUtils = new double[this.game.States.length][this.game.States[0].length];
 		
 		while(iter < numIteration)
 		{
@@ -73,22 +100,33 @@ public class Solver {
 					State s = this.game.States[i][j];
 					if(!s.IsWall && !s.IsTerminal)
 					{
-						this.SetNewUtilityWithBellman(this.game.States[i][j]);
-						
+						this.SetNewUtilityWithBellman(this.game.States[i][j]);	
 					}
 				}	
 			}
 			iter++;
 		}
+		
+		for(int i = 0; i < this.game.States.length; i++)
+		{
+			for(int j = 0; j < this.game.States[0].length; j++)
+			{
+				allUtils[i][j] = this.game.States[i][j].GetUtility();
+			}
+		}
+		
+		return allUtils;
 	}
 
 	
-	public void ReinforcementLearning()
+	public double[][] ReinforcementLearning()
 	{
 		int step = 1;
 		State currState = this.game.StartState;
+
+		double[][] allUtils = new double[this.game.States.length][this.game.States[0].length];
 		
-		while(step < 400000)
+		while(step < 100000)
 		{	
 			currState.TimeStep = currState.TimeStep + 1;
 			ACTION selectedAction = this.selectAction(currState);
@@ -104,6 +142,16 @@ public class Solver {
 			
 			step++;
 		}
+		
+		for(int i = 0; i < this.game.States.length; i++)
+		{
+			for(int j = 0; j < this.game.States[0].length; j++)
+			{
+				allUtils[i][j] = this.game.States[i][j].GetUtility();
+			}
+		}
+		
+		return allUtils;
 	}
 	
 	private double explorationFuction(double expectedUtil, int numTimesTaken)
@@ -128,7 +176,6 @@ public class Solver {
 	{
 		double alpha = this.getAlpha(currState.TimeStep);
 		double currQ = currState.GetQValue(selectedAction);
-		double discountFactor = 0.7;
 		double maxQForSucc;
 		double newCurrQ = 0.0;
 		maxQForSucc = succState.GetUtility();
